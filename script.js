@@ -455,14 +455,15 @@
       addRow(dl, 'Ended', endedText(ep));
       addRow(dl, 'Length', dur(ep));
 
-      var locDd = addRow(dl, 'Location', locText(ep) + (ep.loc ? ' ' : ''));
       if (ep.loc) {
         var a = document.createElement('a');
         a.href = mapUrl(ep.loc);
         a.target = '_blank';
         a.rel = 'noopener';
         a.textContent = 'Open map';
-        locDd.appendChild(a);
+        addRow(dl, 'Location', a);
+      } else {
+        addRow(dl, 'Location', locText(ep));
       }
 
       var doseCount = doses(ep);

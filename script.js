@@ -603,8 +603,8 @@
     if (testing) return;
     testing = true;
     var b = $('testBtn');
-    b.textContent = 'Testing…';
     b.classList.add('testing');
+    b.setAttribute('aria-busy', 'true');
     unlock();
     beep(1)
       .then(function () {
@@ -612,8 +612,8 @@
       })
       .then(function () {
         testing = false;
-        b.textContent = 'Test sound & voice';
         b.classList.remove('testing');
+        b.removeAttribute('aria-busy');
       });
   });
 

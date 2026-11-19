@@ -60,10 +60,56 @@ main {
 }
 
 #idle {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: var(--s4);
+  padding-top: var(--s5);
+}
+
+.test-icon-btn {
+  position: absolute;
+  top: calc(-1 * var(--s2));
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.test-icon-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.test-icon-btn:hover {
+  filter: brightness(0.96);
+}
+
+.test-icon-btn:active {
+  filter: brightness(0.92);
+}
+
+.test-icon-btn.testing {
+  opacity: 1;
+  color: var(--go);
+  background: var(--go-ring);
+  animation: testPulse 1s ease-in-out infinite;
+}
+
+@keyframes testPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
 }
 
 #history {

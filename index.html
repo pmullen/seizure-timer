@@ -3,20 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b7a5a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Seizure timer">
   <title>Seizure timer</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/images/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/images/icon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main>
-    <h1>Seizure timer</h1>
-
     <section id="idle">
-      <button class="start" id="startBtn"><span>Start<br> Timer</span></button>
-      <div class="row">
-        <button class="btn" id="testBtn">Test sound and voice</button>
-      </div>
-      <p class="note">Tap Start Timer when a seizure begins. It logs the time and your location, then speaks at 45 seconds, 1, 2, 3, 4 and 5 minutes. Keep the volume up, this page open and the screen unlocked.</p>
+      <button class="start" id="startBtn"><span class="start-label">Start<br>Timer</span></button>
+      <button class="btn-subtle" id="testBtn">Test sound &amp; voice</button>
     </section>
 
     <section id="running" hidden>
@@ -43,14 +45,15 @@
     </section>
 
     <section id="history">
-      <h2>Past events</h2>
-      <div id="list"></div>
-      <div class="row">
-        <button class="btn" id="copyBtn">Copy log</button>
-        <button class="btn" id="clearBtn">Clear history</button>
+      <div class="history-head">
+        <h2>Past events <span class="count" id="eventCount" hidden></span></h2>
+        <div class="history-actions" id="historyActions" hidden>
+          <button class="btn" id="copyBtn">Copy log</button>
+          <button class="btn" id="clearBtn">Clear history</button>
+        </div>
       </div>
-      <div class="toast" id="toast"></div>
-      <p class="note">This timer is a memory aid, not a medical device. Follow your own seizure action plan, and always test the sound before you need it. Your log is stored only on this phone, in this browser.</p>
+      <div class="toast" id="toast" aria-live="polite"></div>
+      <div id="list"></div>
     </section>
   </main>
 

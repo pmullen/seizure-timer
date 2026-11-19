@@ -1,0 +1,16 @@
+{
+  "name": "Seizure timer",
+  "short_name": "Seizure timer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f5f5",
+  "theme_color": "#0b7a5a",
+  "icons": [
+    {
+      "src": "assets/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

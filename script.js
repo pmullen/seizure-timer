@@ -10,6 +10,7 @@
   var wl = null;
   var stopArm = null;
   var clearArm = null;
+  var testing = false;
   var chain = Promise.resolve();
   var FIXED = [45, 60, 120, 180, 240, 300];
 
@@ -124,7 +125,7 @@
 
   function announce(p) {
     return beep(p.b).then(function () {
-      return say(p.text);
+      return say(p.speech || p.text);
     });
   }
 
@@ -135,6 +136,7 @@
     if (s === 300) {
       return {
         text: '5 minutes, administer second dose of rescue medication and call 000 immediately',
+        speech: '5 minutes, administer second dose of rescue medication and call triple-zero immediately',
         b: 3,
         lv: 'red'
       };
@@ -350,22 +352,36 @@
     return ep.end ? tm(ep.end) : ep === cur ? 'In progress' : 'Not stopped';
   }
 
-  function doses(ep) {
+  function elapsedSec(ep) {
     var el = ep.end ? (ep.end - ep.start) / 1000 : ep === cur ? (Date.now() - ep.start) / 1000 : 0;
     var maxEv = ep.events
       ? ep.events.reduce(function (m, e) {
           return e.s > m ? e.s : m;
         }, 0)
       : 0;
-    var s = Math.max(el, maxEv);
+    return Math.max(el, maxEv);
+  }
+
+  function doses(ep) {
+    var s = elapsedSec(ep);
     if (s >= 300) return 2;
     if (s >= 60) return 1;
     return 0;
   }
 
+  function ambulanceCalled(ep) {
+    return elapsedSec(ep) >= 300 ? 'Yes' : 'No';
+  }
+
   function renderList() {
     var box = $('list');
+    var actions = $('historyActions');
+    var count = $('eventCount');
     box.innerHTML = '';
+    actions.hidden = !eps.length;
+    count.hidden = !eps.length;
+    if (eps.length) count.textContent = eps.length;
+
     if (!eps.length) {
       var p = document.createElement('p');
       p.className = 'note';
@@ -373,35 +389,93 @@
       box.appendChild(p);
       return;
     }
-    eps.forEach(function (ep) {
+
+    function addRow(dl, label, content) {
+      var dtEl = document.createElement('dt');
+      dtEl.textContent = label;
+      var ddEl = document.createElement('dd');
+      if (typeof content === 'string' || typeof content === 'number') {
+        ddEl.textContent = content;
+      } else {
+        ddEl.appendChild(content);
+      }
+      dl.appendChild(dtEl);
+      dl.appendChild(ddEl);
+      return ddEl;
+    }
+
+    function badge(text, cls) {
+      var span = document.createElement('span');
+      span.className = 'badge ' + cls;
+      span.textContent = text;
+      return span;
+    }
+
+    eps.forEach(function (ep, idx) {
       var d = document.createElement('div');
       d.className = 'ep';
+
+      var head = document.createElement('div');
+      head.className = 'ep-head';
       var h = document.createElement('h3');
       h.textContent = dt(ep.start);
-      d.appendChild(h);
-      var pStart = document.createElement('p');
-      pStart.textContent = 'Started: ' + tm(ep.start);
-      d.appendChild(pStart);
-      var pEnd = document.createElement('p');
-      pEnd.textContent = 'Ended: ' + endedText(ep);
-      d.appendChild(pEnd);
-      var pLen = document.createElement('p');
-      pLen.textContent = 'Length: ' + dur(ep);
-      d.appendChild(pLen);
-      var pLoc = document.createElement('p');
-      pLoc.appendChild(document.createTextNode('Location: ' + locText(ep) + ' '));
+      head.appendChild(h);
+
+      if (ep !== cur) {
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'ep-del';
+        del.textContent = 'Remove';
+        var armTimer = null;
+        del.addEventListener('click', function () {
+          if (armTimer) {
+            clearTimeout(armTimer);
+            armTimer = null;
+            eps.splice(idx, 1);
+            save();
+            renderList();
+            toast('Entry removed.');
+            return;
+          }
+          del.textContent = 'Confirm?';
+          del.classList.add('armed');
+          armTimer = setTimeout(function () {
+            armTimer = null;
+            del.textContent = 'Remove';
+            del.classList.remove('armed');
+          }, 4000);
+        });
+        head.appendChild(del);
+      }
+      d.appendChild(head);
+
+      var dl = document.createElement('dl');
+      dl.className = 'ep-grid';
+      addRow(dl, 'Started', tm(ep.start));
+      addRow(dl, 'Ended', endedText(ep));
+      addRow(dl, 'Length', dur(ep));
+
+      var locDd = addRow(dl, 'Location', locText(ep) + (ep.loc ? ' ' : ''));
       if (ep.loc) {
         var a = document.createElement('a');
         a.href = mapUrl(ep.loc);
         a.target = '_blank';
         a.rel = 'noopener';
         a.textContent = 'Open map';
-        pLoc.appendChild(a);
+        locDd.appendChild(a);
       }
-      d.appendChild(pLoc);
-      var pDoses = document.createElement('p');
-      pDoses.textContent = 'Doses of rescue medicine: ' + doses(ep);
-      d.appendChild(pDoses);
+
+      var doseCount = doses(ep);
+      addRow(
+        dl,
+        'Midazolam',
+        doseCount === 2 ? badge('2', 'red') : doseCount === 1 ? badge('1', 'amber') : '0'
+      );
+
+      var amb = ambulanceCalled(ep);
+      addRow(dl, 'Ambulance', amb === 'Yes' ? badge('Yes', 'red') : 'No');
+
+      d.appendChild(dl);
       box.appendChild(d);
     });
   }
@@ -415,7 +489,8 @@
           'Ended: ' + endedText(ep),
           'Length: ' + dur(ep),
           'Location: ' + (ep.loc ? locText(ep) + ' ' + mapUrl(ep.loc) : locText(ep)),
-          'Doses of rescue medicine: ' + doses(ep)
+          'Midazolam: ' + doses(ep),
+          'Ambulance: ' + ambulanceCalled(ep)
         ].join('\n');
       })
       .join('\n\n');
@@ -432,10 +507,21 @@
   $('startBtn').addEventListener('click', start);
 
   $('testBtn').addEventListener('click', function () {
+    if (testing) return;
+    testing = true;
+    var b = $('testBtn');
+    b.textContent = 'Testing…';
+    b.classList.add('testing');
     unlock();
-    beep(1).then(function () {
-      return say('Sound test. Beep and voice are working.');
-    });
+    beep(1)
+      .then(function () {
+        return say('Sound test. Beep and voice are working.');
+      })
+      .then(function () {
+        testing = false;
+        b.textContent = 'Test sound & voice';
+        b.classList.remove('testing');
+      });
   });
 
   $('stopBtn').addEventListener('click', function () {
@@ -531,4 +617,12 @@
     showRunning();
   }
   renderList();
+
+  /* register offline service worker when served over http(s) */
+  if (
+    'serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ) {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  }
 })();

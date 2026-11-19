@@ -95,6 +95,46 @@
     });
   }
 
+  var bestVoice = null;
+
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    var voices = speechSynthesis.getVoices();
+    if (!voices || !voices.length) return null;
+    var best = null;
+    var bestScore = -999;
+    voices.forEach(function (v) {
+      var lang = (v.lang || '').toLowerCase();
+      var name = (v.name || '').toLowerCase();
+      if (lang.indexOf('en') !== 0) return;
+      var score = 0;
+      if (lang === 'en-au' || lang.indexOf('en-au') === 0) score += 40;
+      else if (lang === 'en-gb') score += 15;
+      else score += 10;
+      if (name.indexOf('premium') !== -1) score += 35;
+      if (name.indexOf('enhanced') !== -1) score += 30;
+      if (name.indexOf('natural') !== -1) score += 30;
+      if (name.indexOf('neural') !== -1) score += 30;
+      if (name.indexOf('siri') !== -1) score += 28;
+      if (name.indexOf('google') !== -1) score += 20;
+      if (/matilda|catherine|karen|lee|gordon/.test(name)) score += 10;
+      if (name.indexOf('compact') !== -1 || name.indexOf('espeak') !== -1) score -= 25;
+      if (score > bestScore) {
+        bestScore = score;
+        best = v;
+      }
+    });
+    bestVoice = best;
+    return best;
+  }
+
+  if ('speechSynthesis' in window) {
+    pickVoice();
+    if ('onvoiceschanged' in speechSynthesis) {
+      speechSynthesis.onvoiceschanged = pickVoice;
+    }
+  }
+
   function say(text) {
     return new Promise(function (res) {
       if (!('speechSynthesis' in window)) {
@@ -110,8 +150,11 @@
       };
       try {
         var u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-AU';
-        u.rate = 0.95;
+        var v = bestVoice || pickVoice();
+        if (v) u.voice = v;
+        u.lang = v ? v.lang : 'en-AU';
+        u.rate = 0.96;
+        u.pitch = 1;
         u.volume = 1;
         u.onend = f;
         u.onerror = f;

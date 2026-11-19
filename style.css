@@ -1,0 +1,348 @@
+:root {
+  --bg: #f2f5f5;
+  --surface: #ffffff;
+  --ink: #14212b;
+  --muted: #4a5a65;
+  --line: #c9d5da;
+  --go: #0b7a5a;
+  --goink: #ffffff;
+  --amber: #ffd45a;
+  --amberink: #2b2100;
+  --red: #c62828;
+  --redink: #ffffff;
+  --info: #d6eaf6;
+  --infoink: #0d2d42;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1a1f;
+    --surface: #16262d;
+    --ink: #eef4f6;
+    --muted: #a3b4bc;
+    --line: #2c414a;
+    --go: #2fbf8f;
+    --goink: #04231a;
+    --amber: #ffd45a;
+    --amberink: #2b2100;
+    --red: #ff6b6b;
+    --redink: #2a0606;
+    --info: #1d3b4d;
+    --infoink: #e3f1fa;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1a1f;
+  --surface: #16262d;
+  --ink: #eef4f6;
+  --muted: #a3b4bc;
+  --line: #2c414a;
+  --go: #2fbf8f;
+  --goink: #04231a;
+  --amber: #ffd45a;
+  --amberink: #2b2100;
+  --red: #ff6b6b;
+  --redink: #2a0606;
+  --info: #1d3b4d;
+  --infoink: #e3f1fa;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: var(--s5) var(--s4) var(--s7);
+}
+
+h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0 0 var(--s5);
+  color: var(--muted);
+}
+
+h2 {
+  font-size: 1.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: var(--s7) 0 var(--s4);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  color: inherit;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 4px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: min(100%, 50vh, 21rem);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--go);
+  color: var(--goink);
+  font-size: clamp(2rem, 10vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  padding: var(--s5);
+}
+
+.start:active {
+  filter: brightness(0.92);
+}
+
+.row {
+  display: flex;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  margin-top: var(--s4);
+}
+
+.btn {
+  min-height: 3.25rem;
+  padding: var(--s3) var(--s5);
+  border-radius: 16px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+
+.btn.stop {
+  flex: 1 1 100%;
+  min-height: 4.5rem;
+  padding: var(--s5);
+  font-size: 1.25rem;
+  letter-spacing: 0;
+  border-color: var(--ink);
+}
+
+.btn.stop.armed {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  max-width: 34em;
+  margin: var(--s5) 0 0;
+  text-wrap: pretty;
+}
+
+.clock {
+  font-size: clamp(5.5rem, 30vw, 9rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 0.95;
+  margin: var(--s2) 0 var(--s5);
+  letter-spacing: -0.035em;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: var(--s2) var(--s4);
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.facts a {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+.banner {
+  margin: var(--s5) 0 0;
+  padding: var(--s5);
+  border-radius: 20px;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.banner.info {
+  background: var(--info);
+  color: var(--infoink);
+}
+
+.banner.amber {
+  background: var(--amber);
+  color: var(--amberink);
+}
+
+.banner.red {
+  background: var(--red);
+  color: var(--redink);
+}
+
+.track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--line);
+  margin: var(--s7) 0;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 6px;
+  background: var(--go);
+}
+
+.tick {
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 22px;
+  border-radius: 1px;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+.tick span {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tick span.up {
+  top: auto;
+  bottom: 28px;
+}
+
+.events {
+  list-style: none;
+  margin: 0 0 var(--s5);
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.events li {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr auto;
+  align-items: baseline;
+  gap: var(--s4);
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.events b {
+  font-variant-numeric: tabular-nums;
+}
+
+.events time {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ep {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 20px;
+  padding: var(--s4) var(--s5);
+  margin: 0 0 var(--s3);
+}
+
+.ep h3 {
+  margin: 0 0 var(--s2);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.ep p {
+  margin: var(--s1) 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.ep a {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.toast {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  min-height: 1.5em;
+  margin-top: var(--s3);
+}

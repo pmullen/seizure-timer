@@ -1,10 +1,10 @@
-var CACHE = 'seizure-timer-v2';
+var CACHE = 'seizure-timer-v3';
 var ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './script.js',
-  './manifest.json',
+  './style.css?v=3',
+  './script.js?v=3',
+  './manifest.json?v=3',
   './assets/images/icon.svg'
 ];
 

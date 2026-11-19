@@ -1,9 +1,9 @@
 :root {
-  --bg: #f2f5f5;
+  --bg: #f6f4f8;
   --surface: #ffffff;
   --ink: #14212b;
   --muted: #4a5a65;
-  --line: #c9d5da;
+  --line: #d5cfe0;
   --go: #5e358c;
   --go-hi: #7e52b5;
   --go-lo: #43226b;
@@ -29,6 +29,8 @@
 }
 
 html {
+  min-height: 100%;
+  background: var(--bg);
   scroll-padding-top: env(safe-area-inset-top, 0px);
 }
 

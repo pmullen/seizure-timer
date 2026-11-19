@@ -237,7 +237,6 @@
     if (!cur) return;
     var el = $('locLine');
     el.textContent = '';
-    el.appendChild(document.createTextNode(locText(cur) + ' '));
     if (cur.loc) {
       var a = document.createElement('a');
       a.href = mapUrl(cur.loc);
@@ -245,6 +244,8 @@
       a.rel = 'noopener';
       a.textContent = 'Open map';
       el.appendChild(a);
+    } else {
+      el.textContent = locText(cur);
     }
   }
 

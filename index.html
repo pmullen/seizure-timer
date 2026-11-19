@@ -36,7 +36,7 @@ h1{font-size:1rem;font-weight:700;letter-spacing:.01em;margin:0 0 var(--s5);colo
 h2{font-size:1.375rem;line-height:1.2;letter-spacing:-.01em;margin:var(--s7) 0 var(--s4)}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
 button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
-.start{display:block;width:100%;min-height:50vh;border-radius:32px;background:var(--go);color:var(--goink);font-size:clamp(3.25rem,19vw,5.75rem);font-weight:700;line-height:1;letter-spacing:.06em;padding:0 0 0 .06em}
+.start{display:flex;align-items:center;justify-content:center;text-align:center;width:min(100%,50vh,21rem);aspect-ratio:1/1;margin:0 auto;border-radius:50%;background:var(--go);color:var(--goink);font-size:clamp(2rem,10vw,3.25rem);font-weight:700;line-height:1.1;letter-spacing:.01em;padding:var(--s5)}
 .start:active{filter:brightness(.92)}
 .row{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s4)}
 .btn{min-height:3.25rem;padding:var(--s3) var(--s5);border-radius:16px;background:var(--surface);border:2px solid var(--line);font-size:1rem;font-weight:700;letter-spacing:.005em}
@@ -74,11 +74,11 @@ button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset
   <h1>Seizure timer</h1>
 
   <section id="idle">
-    <button class="start" id="startBtn">START</button>
+    <button class="start" id="startBtn"><span>Start<br> Timer</span></button>
     <div class="row">
       <button class="btn" id="testBtn">Test sound and voice</button>
     </div>
-    <p class="note">Tap START when a seizure begins. It logs the time and your location, then speaks at 45 seconds, 1, 2, 3, 4 and 5 minutes. Keep the volume up, this page open and the screen unlocked.</p>
+    <p class="note">Tap Start Timer when a seizure begins. It logs the time and your location, then speaks at 45 seconds, 1, 2, 3, 4 and 5 minutes. Keep the volume up, this page open and the screen unlocked.</p>
   </section>
 
   <section id="running" hidden>
@@ -120,7 +120,7 @@ button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset
 (function(){
   var $=function(id){return document.getElementById(id)};
   var KEY='seizure-log-v1';
-  var eps=load(), cur=null, timer=null, audio=null, wl=null, stopArm=null, chain=Promise.resolve();
+  var eps=load(), cur=null, timer=null, audio=null, wl=null, stopArm=null, clearArm=null, chain=Promise.resolve();
   var FIXED=[45,60,120,180,240,300];
 
   function load(){try{var v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v:[]}catch(e){return[]}}
@@ -290,6 +290,15 @@ button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset
     else bn.hidden=true;
   }
   function dur(ep){return ep.end?fmt((ep.end-ep.start)/1000):'not stopped'}
+  function endedText(ep){return ep.end?tm(ep.end):(ep===cur?'In progress':'Not stopped')}
+  function doses(ep){
+    var el=ep.end?(ep.end-ep.start)/1000:(ep===cur?(Date.now()-ep.start)/1000:0);
+    var maxEv=ep.events?ep.events.reduce(function(m,e){return e.s>m?e.s:m},0):0;
+    var s=Math.max(el,maxEv);
+    if(s>=300)return 2;
+    if(s>=60)return 1;
+    return 0;
+  }
   function renderList(){
     var box=$('list');box.innerHTML='';
     if(!eps.length){
@@ -297,21 +306,27 @@ button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset
     }
     eps.forEach(function(ep){
       var d=document.createElement('div');d.className='ep';
-      var h=document.createElement('h3');h.textContent=dt(ep.start)+', '+tm(ep.start);d.appendChild(h);
-      var p1=document.createElement('p');p1.textContent='Length: '+dur(ep);d.appendChild(p1);
-      var p2=document.createElement('p');p2.appendChild(document.createTextNode('Location: '+locText(ep)+' '));
-      if(ep.loc){var a=document.createElement('a');a.href=mapUrl(ep.loc);a.target='_blank';a.rel='noopener';a.textContent='Open map';p2.appendChild(a)}
-      d.appendChild(p2);
-      var marks=ep.events.filter(function(e){return e.s>0&&e.text!=='Ended'}).map(function(e){return fmt(e.s)+' '+e.text});
-      if(marks.length){var p3=document.createElement('p');p3.textContent='Alerts: '+marks.join('; ');d.appendChild(p3)}
+      var h=document.createElement('h3');h.textContent=dt(ep.start);d.appendChild(h);
+      var pStart=document.createElement('p');pStart.textContent='Started: '+tm(ep.start);d.appendChild(pStart);
+      var pEnd=document.createElement('p');pEnd.textContent='Ended: '+endedText(ep);d.appendChild(pEnd);
+      var pLen=document.createElement('p');pLen.textContent='Length: '+dur(ep);d.appendChild(pLen);
+      var pLoc=document.createElement('p');pLoc.appendChild(document.createTextNode('Location: '+locText(ep)+' '));
+      if(ep.loc){var a=document.createElement('a');a.href=mapUrl(ep.loc);a.target='_blank';a.rel='noopener';a.textContent='Open map';pLoc.appendChild(a)}
+      d.appendChild(pLoc);
+      var pDoses=document.createElement('p');pDoses.textContent='Doses of rescue medicine: '+doses(ep);d.appendChild(pDoses);
       box.appendChild(d);
     });
   }
   function summary(){
     return eps.map(function(ep){
-      var l=['Seizure: '+dt(ep.start)+', '+tm(ep.start),'Length: '+dur(ep),'Location: '+(ep.loc?locText(ep)+' '+mapUrl(ep.loc):locText(ep))];
-      ep.events.forEach(function(e){l.push('  '+fmt(e.s)+' '+e.text+' ('+tm(e.t)+')')});
-      return l.join('\n');
+      return [
+        dt(ep.start),
+        'Started: '+tm(ep.start),
+        'Ended: '+endedText(ep),
+        'Length: '+dur(ep),
+        'Location: '+(ep.loc?locText(ep)+' '+mapUrl(ep.loc):locText(ep)),
+        'Doses of rescue medicine: '+doses(ep)
+      ].join('\n');
     }).join('\n\n');
   }
   function toast(t){$('toast').textContent=t;setTimeout(function(){if($('toast').textContent===t)$('toast').textContent=''},4000)}
@@ -339,7 +354,10 @@ button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset
   $('clearBtn').addEventListener('click',function(){
     if(cur){toast('Stop the current timer first.');return}
     if(!eps.length)return;
-    if(confirm('Delete all logged events from this phone?')){eps=[];save();renderList()}
+    var b=$('clearBtn');
+    if(clearArm){clearTimeout(clearArm);clearArm=null;b.textContent='Clear history';eps=[];save();renderList();toast('History cleared.');return}
+    b.textContent='Tap again to clear';
+    clearArm=setTimeout(function(){clearArm=null;b.textContent='Clear history'},4000);
   });
   document.addEventListener('pointerdown',function(){if(!audio||audio.state==='suspended'){unlock();if(cur)sys()}});
   document.addEventListener('visibilitychange',function(){

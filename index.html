@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seizure timer</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f5f5;--surface:#ffffff;--ink:#14212b;--muted:#4a5a65;--line:#c9d5da;
+  --go:#0b7a5a;--goink:#ffffff;--amber:#ffd45a;--amberink:#2b2100;
+  --red:#c62828;--redink:#ffffff;--info:#d6eaf6;--infoink:#0d2d42;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1a1f;--surface:#16262d;--ink:#eef4f6;--muted:#a3b4bc;--line:#2c414a;
+    --go:#2fbf8f;--goink:#04231a;--amber:#ffd45a;--amberink:#2b2100;
+    --red:#ff6b6b;--redink:#2a0606;--info:#1d3b4d;--infoink:#e3f1fa;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1a1f;--surface:#16262d;--ink:#eef4f6;--muted:#a3b4bc;--line:#2c414a;
+  --go:#2fbf8f;--goink:#04231a;--amber:#ffd45a;--amberink:#2b2100;
+  --red:#ff6b6b;--redink:#2a0606;--info:#1d3b4d;--infoink:#e3f1fa;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:1.0625rem;line-height:1.5;font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+main{max-width:34rem;margin:0 auto;padding:var(--s5) var(--s4) var(--s7)}
+h1{font-size:1rem;font-weight:700;letter-spacing:.01em;margin:0 0 var(--s5);color:var(--muted)}
+h2{font-size:1.375rem;line-height:1.2;letter-spacing:-.01em;margin:var(--s7) 0 var(--s4)}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+button:focus-visible,a:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+.start{display:block;width:100%;min-height:50vh;border-radius:32px;background:var(--go);color:var(--goink);font-size:clamp(3.25rem,19vw,5.75rem);font-weight:700;line-height:1;letter-spacing:.06em;padding:0 0 0 .06em}
+.start:active{filter:brightness(.92)}
+.row{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s4)}
+.btn{min-height:3.25rem;padding:var(--s3) var(--s5);border-radius:16px;background:var(--surface);border:2px solid var(--line);font-size:1rem;font-weight:700;letter-spacing:.005em}
+.btn.stop{flex:1 1 100%;min-height:4.5rem;padding:var(--s5);font-size:1.25rem;letter-spacing:0;border-color:var(--ink)}
+.btn.stop.armed{background:var(--ink);color:var(--bg)}
+.note{color:var(--muted);font-size:.9375rem;line-height:1.6;max-width:34em;margin:var(--s5) 0 0;text-wrap:pretty}
+.clock{font-size:clamp(5.5rem,30vw,9rem);font-weight:700;font-variant-numeric:tabular-nums lining-nums;line-height:.95;margin:var(--s2) 0 var(--s5);letter-spacing:-.035em}
+.facts{display:grid;grid-template-columns:5.5rem 1fr;gap:var(--s2) var(--s4);margin:0;font-size:.9375rem;line-height:1.45}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0}
+.facts a{color:inherit;font-weight:700;text-underline-offset:.2em}
+.banner{margin:var(--s5) 0 0;padding:var(--s5);border-radius:20px;font-size:1.625rem;font-weight:700;line-height:1.2;letter-spacing:-.015em;text-wrap:balance}
+.banner.info{background:var(--info);color:var(--infoink)}
+.banner.amber{background:var(--amber);color:var(--amberink)}
+.banner.red{background:var(--red);color:var(--redink)}
+.track{position:relative;height:12px;border-radius:6px;background:var(--line);margin:var(--s7) 0}
+.fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:6px;background:var(--go)}
+.tick{position:absolute;top:-5px;width:2px;height:22px;border-radius:1px;background:var(--ink);transform:translateX(-50%)}
+.tick span{position:absolute;top:28px;left:50%;transform:translateX(-50%);font-size:.8125rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--muted);white-space:nowrap}
+.tick span.up{top:auto;bottom:28px}
+.events{list-style:none;margin:0 0 var(--s5);padding:0;border-top:1px solid var(--line)}
+.events li{display:grid;grid-template-columns:3.5rem 1fr auto;align-items:baseline;gap:var(--s4);padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.events b{font-variant-numeric:tabular-nums}
+.events time{color:var(--muted);font-size:.875rem;font-variant-numeric:tabular-nums}
+.ep{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:var(--s4) var(--s5);margin:0 0 var(--s3)}
+.ep h3{margin:0 0 var(--s2);font-size:1.0625rem;line-height:1.3;letter-spacing:-.005em}
+.ep p{margin:var(--s1) 0 0;color:var(--muted);font-size:.9375rem;line-height:1.5}
+.ep a{color:inherit;font-weight:700;text-underline-offset:.2em}
+[hidden]{display:none!important}
+.toast{color:var(--muted);font-size:.9375rem;min-height:1.5em;margin-top:var(--s3)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Seizure timer</h1>
+
+  <section id="idle">
+    <button class="start" id="startBtn">START</button>
+    <div class="row">
+      <button class="btn" id="testBtn">Test sound and voice</button>
+    </div>
+    <p class="note">Tap START when a seizure begins. It logs the time and your location, then speaks at 45 seconds, 1, 2, 3, 4 and 5 minutes. Keep the volume up, this page open and the screen unlocked.</p>
+  </section>
+
+  <section id="running" hidden>
+    <div class="clock" id="clock" aria-live="off">0:00</div>
+    <dl class="facts">
+      <dt>Started</dt><dd id="startedAt"></dd>
+      <dt>Location</dt><dd id="locLine"></dd>
+      <dt>Status</dt><dd id="sysLine"></dd>
+    </dl>
+    <div class="banner info" id="banner" hidden role="alert"></div>
+    <div class="track" aria-hidden="true">
+      <div class="fill" id="fill"></div>
+      <div class="tick" style="left:15%"><span class="up">45s</span></div>
+      <div class="tick" style="left:20%"><span>1m</span></div>
+      <div class="tick" style="left:40%"><span>2m</span></div>
+      <div class="tick" style="left:60%"><span>3m</span></div>
+      <div class="tick" style="left:80%"><span>4m</span></div>
+      <div class="tick" style="left:100%"><span>5m</span></div>
+    </div>
+    <ul class="events" id="events"></ul>
+    <div class="row">
+      <button class="btn stop" id="stopBtn">Seizure ended</button>
+    </div>
+  </section>
+
+  <section id="history">
+    <h2>Past events</h2>
+    <div id="list"></div>
+    <div class="row">
+      <button class="btn" id="copyBtn">Copy log</button>
+      <button class="btn" id="clearBtn">Clear history</button>
+    </div>
+    <div class="toast" id="toast"></div>
+    <p class="note">This timer is a memory aid, not a medical device. Follow your own seizure action plan, and always test the sound before you need it. Your log is stored only on this phone, in this browser.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var KEY='seizure-log-v1';
+  var eps=load(), cur=null, timer=null, audio=null, wl=null, stopArm=null, chain=Promise.resolve();
+  var FIXED=[45,60,120,180,240,300];
+
+  function load(){try{var v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v:[]}catch(e){return[]}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(eps))}catch(e){}}
+  function pad(n){return n<10?'0'+n:''+n}
+  function fmt(sec){sec=Math.max(0,Math.floor(sec));return Math.floor(sec/60)+':'+pad(sec%60)}
+  function tm(ms){return new Date(ms).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit',second:'2-digit'})}
+  function dt(ms){return new Date(ms).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
+  function mapUrl(l){return 'https://www.google.com/maps?q='+l.lat+','+l.lon}
+
+  /* ---------- sound ---------- */
+  function unlock(){
+    try{
+      audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state==='suspended')audio.resume();
+    }catch(e){}
+  }
+  function beep(n){
+    return new Promise(function(res){
+      if(!audio||n<1){res();return}
+      try{
+        if(audio.state==='suspended')audio.resume();
+        var t=audio.currentTime+0.05;
+        for(var i=0;i<n;i++){
+          var o=audio.createOscillator(),g=audio.createGain();
+          o.type='square';o.frequency.value=880;
+          g.gain.setValueAtTime(0.0001,t);
+          g.gain.exponentialRampToValueAtTime(0.4,t+0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+          o.connect(g);g.connect(audio.destination);
+          o.start(t);o.stop(t+0.32);t+=0.45;
+        }
+      }catch(e){}
+      setTimeout(res,n*450+100);
+    });
+  }
+  function say(text){
+    return new Promise(function(res){
+      if(!('speechSynthesis' in window)){res();return}
+      var done=false,f=function(){if(!done){done=true;res()}};
+      try{
+        var u=new SpeechSynthesisUtterance(text);
+        u.lang='en-AU';u.rate=0.95;u.volume=1;
+        u.onend=f;u.onerror=f;
+        setTimeout(f,10000);
+        speechSynthesis.speak(u);
+      }catch(e){f()}
+    });
+  }
+  function announce(p){return beep(p.b).then(function(){return say(p.text)})}
+
+  /* ---------- milestones ---------- */
+  function plan(s){
+    if(s===45)return{text:'45 seconds',b:0,lv:'info'};
+    if(s===60)return{text:'1 minute, administer rescue medication',b:1,lv:'amber'};
+    if(s===300)return{text:'5 minutes, administer second dose of rescue medication and call 000 immediately',b:3,lv:'red'};
+    var m=s/60;
+    return{text:m+' minutes',b:0,lv:m>5?'red':'info'};
+  }
+  function thresholds(el){
+    var list=FIXED.slice();
+    for(var m=6;m*60<=el;m++)list.push(m*60);
+    return list;
+  }
+  function fire(s){
+    var p=plan(s);
+    cur.events.push({s:s,t:cur.start+s*1000,text:p.text,lv:p.lv});
+    save();
+    chain=chain.then(function(){return announce(p)});
+    renderEvents();
+  }
+  function tick(){
+    if(!cur)return;
+    var el=(Date.now()-cur.start)/1000;
+    $('clock').textContent=fmt(el);
+    $('fill').style.width=Math.min(100,el/300*100)+'%';
+    thresholds(el).forEach(function(s){
+      if(el>=s&&!cur.events.some(function(e){return e.s===s}))fire(s);
+    });
+  }
+
+  /* ---------- screen, location ---------- */
+  function wake(){
+    try{
+      if('wakeLock' in navigator){
+        navigator.wakeLock.request('screen').then(function(l){wl=l;sys()}).catch(function(){sys()});
+      }
+    }catch(e){}
+  }
+  function sys(){
+    var t=[];
+    t.push(wl?'Screen will stay on.':'Keep your screen on.');
+    t.push(audio?'Sound is on.':'Tap anywhere to turn sound on.');
+    $('sysLine').textContent=t.join(' ');
+  }
+  function locate(ep){
+    if(!navigator.geolocation){ep.locState='unavailable';save();renderLoc();return}
+    navigator.geolocation.getCurrentPosition(function(pos){
+      ep.loc={lat:+pos.coords.latitude.toFixed(6),lon:+pos.coords.longitude.toFixed(6),acc:pos.coords.accuracy,t:Date.now()};
+      ep.locState='ok';save();renderLoc();renderList();
+    },function(err){
+      ep.locState=err&&err.code===1?'denied':'unavailable';save();renderLoc();renderList();
+    },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+  }
+  function locText(ep){
+    if(ep.loc)return ep.loc.lat.toFixed(5)+', '+ep.loc.lon.toFixed(5)+' (within '+Math.round(ep.loc.acc)+' m)';
+    if(ep.locState==='denied')return 'Location blocked. Allow location for this page in your browser settings.';
+    if(ep.locState==='unavailable')return 'Location not available.';
+    return 'Finding location…';
+  }
+  function renderLoc(){
+    if(!cur)return;
+    var el=$('locLine');el.textContent='';
+    el.appendChild(document.createTextNode(locText(cur)+' '));
+    if(cur.loc){var a=document.createElement('a');a.href=mapUrl(cur.loc);a.target='_blank';a.rel='noopener';a.textContent='Open map';el.appendChild(a)}
+  }
+
+  /* ---------- start / stop ---------- */
+  function start(){
+    unlock();
+    if('speechSynthesis' in window){try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch(e){}}
+    var now=Date.now();
+    cur={id:now,start:now,end:null,loc:null,locState:'pending',events:[{s:0,t:now,text:'Started',lv:'info'}]};
+    eps.unshift(cur);save();
+    chain=Promise.resolve();
+    wake();locate(cur);
+    timer=setInterval(tick,250);
+    showRunning();
+  }
+  function stop(){
+    if(!cur)return;
+    var now=Date.now();
+    cur.end=now;
+    cur.events.push({s:(now-cur.start)/1000,t:now,text:'Ended',lv:'info'});
+    save();
+    clearInterval(timer);timer=null;
+    try{speechSynthesis.cancel()}catch(e){}
+    chain=Promise.resolve();
+    try{if(wl)wl.release()}catch(e){}
+    wl=null;cur=null;
+    $('stopBtn').textContent='Seizure ended';$('stopBtn').classList.remove('armed');
+    showIdle();
+  }
+  function showRunning(){
+    $('idle').hidden=true;$('running').hidden=false;
+    $('startedAt').textContent=tm(cur.start)+', '+dt(cur.start);
+    renderLoc();renderEvents();sys();tick();
+    window.scrollTo(0,0);
+  }
+  function showIdle(){$('idle').hidden=false;$('running').hidden=true;renderList()}
+
+  /* ---------- rendering ---------- */
+  function renderEvents(){
+    if(!cur)return;
+    var ul=$('events');ul.innerHTML='';
+    var last=null;
+    cur.events.forEach(function(e){
+      if(e.s>0&&e.text!=='Ended')last=e;
+      var li=document.createElement('li');
+      var b=document.createElement('b');b.textContent=fmt(e.s);
+      var s=document.createElement('span');s.textContent=e.text;
+      var c=document.createElement('time');c.textContent=tm(e.t);
+      li.appendChild(b);li.appendChild(s);li.appendChild(c);ul.appendChild(li);
+    });
+    var bn=$('banner');
+    if(last){bn.hidden=false;bn.className='banner '+last.lv;bn.textContent=last.text.charAt(0).toUpperCase()+last.text.slice(1)}
+    else bn.hidden=true;
+  }
+  function dur(ep){return ep.end?fmt((ep.end-ep.start)/1000):'not stopped'}
+  function renderList(){
+    var box=$('list');box.innerHTML='';
+    if(!eps.length){
+      var p=document.createElement('p');p.className='note';p.textContent='Nothing logged yet. Each seizure you time will appear here.';box.appendChild(p);return;
+    }
+    eps.forEach(function(ep){
+      var d=document.createElement('div');d.className='ep';
+      var h=document.createElement('h3');h.textContent=dt(ep.start)+', '+tm(ep.start);d.appendChild(h);
+      var p1=document.createElement('p');p1.textContent='Length: '+dur(ep);d.appendChild(p1);
+      var p2=document.createElement('p');p2.appendChild(document.createTextNode('Location: '+locText(ep)+' '));
+      if(ep.loc){var a=document.createElement('a');a.href=mapUrl(ep.loc);a.target='_blank';a.rel='noopener';a.textContent='Open map';p2.appendChild(a)}
+      d.appendChild(p2);
+      var marks=ep.events.filter(function(e){return e.s>0&&e.text!=='Ended'}).map(function(e){return fmt(e.s)+' '+e.text});
+      if(marks.length){var p3=document.createElement('p');p3.textContent='Alerts: '+marks.join('; ');d.appendChild(p3)}
+      box.appendChild(d);
+    });
+  }
+  function summary(){
+    return eps.map(function(ep){
+      var l=['Seizure: '+dt(ep.start)+', '+tm(ep.start),'Length: '+dur(ep),'Location: '+(ep.loc?locText(ep)+' '+mapUrl(ep.loc):locText(ep))];
+      ep.events.forEach(function(e){l.push('  '+fmt(e.s)+' '+e.text+' ('+tm(e.t)+')')});
+      return l.join('\n');
+    }).join('\n\n');
+  }
+  function toast(t){$('toast').textContent=t;setTimeout(function(){if($('toast').textContent===t)$('toast').textContent=''},4000)}
+
+  /* ---------- wiring ---------- */
+  $('startBtn').addEventListener('click',start);
+  $('testBtn').addEventListener('click',function(){
+    unlock();
+    beep(1).then(function(){return say('Sound test. Beep and voice are working.')});
+  });
+  $('stopBtn').addEventListener('click',function(){
+    var b=$('stopBtn');
+    if(stopArm){clearTimeout(stopArm);stopArm=null;stop();return}
+    b.textContent='Tap again to confirm';b.classList.add('armed');
+    stopArm=setTimeout(function(){stopArm=null;b.textContent='Seizure ended';b.classList.remove('armed')},4000);
+  });
+  $('copyBtn').addEventListener('click',function(){
+    if(!eps.length){toast('Nothing to copy yet.');return}
+    var txt=summary();
+    function fallback(){
+      try{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copied.')}catch(e){toast('Could not copy.')}
+    }
+    try{navigator.clipboard.writeText(txt).then(function(){toast('Copied.')},fallback)}catch(e){fallback()}
+  });
+  $('clearBtn').addEventListener('click',function(){
+    if(cur){toast('Stop the current timer first.');return}
+    if(!eps.length)return;
+    if(confirm('Delete all logged events from this phone?')){eps=[];save();renderList()}
+  });
+  document.addEventListener('pointerdown',function(){if(!audio||audio.state==='suspended'){unlock();if(cur)sys()}});
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&cur){wake();tick()}
+  });
+
+  /* resume an unfinished timer after a reload */
+  if(eps[0]&&!eps[0].end&&Date.now()-eps[0].start<3*3600*1000){
+    cur=eps[0];
+    timer=setInterval(tick,250);
+    showRunning();
+  }
+  renderList();
+})();
+</script>
+</body>
+</html>

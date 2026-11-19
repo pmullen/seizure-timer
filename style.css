@@ -263,6 +263,11 @@ a:focus-visible {
   letter-spacing: -0.035em;
 }
 
+.clock .colon {
+  position: relative;
+  top: -0.1em;
+}
+
 .facts {
   display: grid;
   grid-template-columns: 5.5rem 1fr;

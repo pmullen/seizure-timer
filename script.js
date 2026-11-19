@@ -12,7 +12,7 @@
   var clearArm = null;
   var testing = false;
   var chain = Promise.resolve();
-  var FIXED = [45, 60, 120, 180, 240, 300];
+  var FIXED = [45, 60, 120, 180, 240, 285, 300];
 
   function load() {
     try {
@@ -131,8 +131,9 @@
 
   /* ---------- milestones ---------- */
   function plan(s) {
-    if (s === 45) return { text: '45 seconds', b: 0, lv: 'info' };
+    if (s === 45) return { text: '45 seconds, start to prepare rescue medication', b: 0, lv: 'info' };
     if (s === 60) return { text: '1 minute, administer rescue medication', b: 1, lv: 'amber' };
+    if (s === 285) return { text: '4 minutes 45 seconds, start to prepare rescue medication', b: 0, lv: 'amber' };
     if (s === 300) {
       return {
         text: '5 minutes, administer second dose of rescue medication and call 000 immediately',
@@ -164,7 +165,9 @@
   function tick() {
     if (!cur) return;
     var el = (Date.now() - cur.start) / 1000;
-    $('clock').textContent = fmt(el);
+    var sec = Math.max(0, Math.floor(el));
+    $('clockMin').textContent = Math.floor(sec / 60);
+    $('clockSec').textContent = pad(sec % 60);
     $('fill').style.width = Math.min(100, (el / 300) * 100) + '%';
     thresholds(el).forEach(function (s) {
       if (el >= s && !cur.events.some(function (e) { return e.s === s; })) {

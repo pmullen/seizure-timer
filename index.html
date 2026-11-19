@@ -23,7 +23,7 @@
     </section>
 
     <section id="running" hidden>
-      <div class="clock" id="clock" aria-live="off">0:00</div>
+      <div class="clock" id="clock" aria-live="off"><span id="clockMin">0</span><span class="colon">:</span><span id="clockSec">00</span></div>
       <dl class="facts">
         <dt>Started</dt><dd id="startedAt"></dd>
         <dt>Location</dt><dd id="locLine"></dd>
@@ -37,6 +37,7 @@
         <div class="tick" style="left:40%"><span>2m</span></div>
         <div class="tick" style="left:60%"><span>3m</span></div>
         <div class="tick" style="left:80%"><span>4m</span></div>
+        <div class="tick" style="left:95%"><span class="up">4:45</span></div>
         <div class="tick" style="left:100%"><span>5m</span></div>
       </div>
       <ul class="events" id="events"></ul>

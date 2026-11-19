@@ -503,3 +503,124 @@ a:focus-visible {
 .toast:empty {
   display: none;
 }
+
+.ended-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s5);
+  background: radial-gradient(circle at 50% 40%, #ffffff 0%, var(--bg) 70%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ended-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ended-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 22rem;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ended-overlay.visible .ended-card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+}
+
+.ended-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 26%, var(--go-hi), var(--go) 55%, var(--go-lo));
+  color: var(--goink);
+  box-shadow:
+    0 0 0 14px var(--go-ring),
+    0 12px 28px -8px var(--go-glow);
+  margin-bottom: var(--s5);
+}
+
+.ended-icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.ended-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 var(--s2);
+}
+
+.ended-meta {
+  margin: 0 0 var(--s5);
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.ended-bar {
+  width: 8rem;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+  margin-bottom: var(--s4);
+}
+
+.ended-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--go);
+  border-radius: 999px;
+  transform-origin: left center;
+}
+
+.ended-bar-fill.running {
+  animation: endedCountdown 5s linear forwards;
+}
+
+@keyframes endedCountdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.ended-close {
+  margin-top: var(--s2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ended-overlay,
+  .ended-card {
+    transition: none;
+  }
+}

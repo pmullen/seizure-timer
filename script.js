@@ -10,6 +10,9 @@
   var wl = null;
   var stopArm = null;
   var clearArm = null;
+  var endedTimer = null;
+  var endedFadeTimer = null;
+  var endedSwapTimer = null;
   var testing = false;
   var chain = Promise.resolve();
   var FIXED = [45, 60, 120, 180, 240, 285, 300];
@@ -325,6 +328,7 @@
   function stop() {
     if (!cur) return;
     var now = Date.now();
+    var len = fmt((now - cur.start) / 1000);
     cur.end = now;
     cur.events.push({ s: (now - cur.start) / 1000, t: now, text: 'Ended', lv: 'info' });
     save();
@@ -341,7 +345,47 @@
     cur = null;
     $('stopBtn').textContent = 'Seizure ended';
     $('stopBtn').classList.remove('armed');
-    showIdle();
+    showEndedScreen(len);
+  }
+
+  function showEndedScreen(len) {
+    var ov = $('endedOverlay');
+    var bar = $('endedBarFill');
+    clearTimeout(endedTimer);
+    clearTimeout(endedFadeTimer);
+    clearTimeout(endedSwapTimer);
+    $('endedMeta').textContent = 'Logged to past events · Length ' + len;
+    bar.classList.remove('running');
+    ov.hidden = false;
+    ov.classList.remove('visible');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        ov.classList.add('visible');
+        bar.classList.add('running');
+      });
+    });
+    endedSwapTimer = setTimeout(function () {
+      showIdle();
+      window.scrollTo(0, 0);
+    }, 550);
+    endedTimer = setTimeout(hideEndedScreen, 5400);
+  }
+
+  function hideEndedScreen() {
+    var ov = $('endedOverlay');
+    clearTimeout(endedTimer);
+    clearTimeout(endedFadeTimer);
+    clearTimeout(endedSwapTimer);
+    endedTimer = null;
+    if ($('idle').hidden) {
+      showIdle();
+      window.scrollTo(0, 0);
+    }
+    ov.classList.remove('visible');
+    endedFadeTimer = setTimeout(function () {
+      ov.hidden = true;
+      $('endedBarFill').classList.remove('running');
+    }, 900);
   }
 
   function showRunning() {
@@ -552,6 +596,7 @@
   }
 
   /* ---------- wiring ---------- */
+  $('endedCloseBtn').addEventListener('click', hideEndedScreen);
   $('startBtn').addEventListener('click', start);
 
   $('testBtn').addEventListener('click', function () {

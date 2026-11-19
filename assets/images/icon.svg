@@ -7,11 +7,13 @@
     </radialGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <circle cx="256" cy="276" r="136" fill="none" stroke="#ffffff" stroke-width="26"/>
-  <path d="M214 104h84" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
-  <path d="M256 104v36" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
-  <path d="M352 172l26-26" stroke="#ffffff" stroke-width="24" stroke-linecap="round"/>
-  <path d="M256 276V200" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
-  <path d="M256 276l54 34" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
-  <circle cx="256" cy="276" r="16" fill="#ffffff"/>
+  <g transform="translate(256 256) scale(0.74) translate(-256 -258)">
+    <circle cx="256" cy="276" r="136" fill="none" stroke="#ffffff" stroke-width="26"/>
+    <path d="M214 104h84" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <path d="M256 104v36" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <path d="M352 172l26-26" stroke="#ffffff" stroke-width="24" stroke-linecap="round"/>
+    <path d="M256 276V200" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <path d="M256 276l54 34" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="256" cy="276" r="16" fill="#ffffff"/>
+  </g>
 </svg>
